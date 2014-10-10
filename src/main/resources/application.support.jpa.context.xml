@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:repository="http://www.springframework.org/schema/data/repository"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/data/repository http://www.springframework.org/schema/data/repository/spring-repository.xsd"
+       default-autowire="no" default-lazy-init="true">
+
+    <import resource="classpath*:META-INF/application.support.jpa.context.xml"/>
+
+    <jpa:repositories base-package="com.sirius.algorithm.tree.preorder.domain.repository"
+                      entity-manager-factory-ref="entityManagerFactory"
+                      transaction-manager-ref="transactionManager"
+                      named-queries-location="classpath*:META-INF/jpa/*.properties"
+                      factory-class="com.sirius.plugin.framework.jpa.domain.repository.CustomJPARepositoryFactoryBean">
+        <repository:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+        <repository:include-filter type="assignable"
+                                   expression="com.sirius.plugin.framework.jpa.domain.repository.BaseRepository"/>
+    </jpa:repositories>
+</beans>
