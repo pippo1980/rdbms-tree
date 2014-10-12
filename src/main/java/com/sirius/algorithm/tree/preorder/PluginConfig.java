@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PluginConfig extends Plugin {
 
-	public static final String PLUGIN_NAME = "console";
+	public static final String PLUGIN_NAME = "tree/preorder";
 
 	public static final String PLUGIN_PATH =
 			StringUtils.isBlank(Plugin.PLUGIN_WEB_PREFIX)
@@ -17,6 +17,6 @@ public class PluginConfig extends Plugin {
 
 	@Override
 	public String getName() {
-		return "tree/preorder";
+		return PLUGIN_NAME;
 	}
 }

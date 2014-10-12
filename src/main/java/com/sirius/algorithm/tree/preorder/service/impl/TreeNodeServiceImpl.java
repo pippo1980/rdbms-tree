@@ -6,10 +6,15 @@ import com.sirius.algorithm.tree.preorder.domain.repository.TreeNodeRepository;
 import com.sirius.algorithm.tree.preorder.service.TreeNodeService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -23,8 +28,48 @@ public class TreeNodeServiceImpl implements TreeNodeService {
 	private TreeNodeRepository treeNodeRepository;
 
 	@Override
+	public void init(int depth, int amountFactor) {
+		//不要用deleteAll,因为deleteAll是要把所有entity取出来,一条一条delete
+		treeNodeRepository.deleteAllInBatch();
+
+		//root node
+		TreeNode root = new TreeNode();
+		root.setId("#");
+		root.setName("root");
+		root.setLeftPriority(0L);
+		root.setRightPriority(1L);
+		root.setDepth(1);
+		treeNodeRepository.save(root);
+
+		//children
+		init("#", 1, depth, amountFactor);
+	}
+
+	private void init(String parentId, int currentDepth, int maxDepth, int amountFactor) {
+		int amount = new Random().nextInt(amountFactor);
+		List<TreeNode> nodes = new ArrayList<>(amount);
+		for (int i = 0; i < amount; i++) {
+			TreeNode node = new TreeNode();
+			node.setName("node_" + currentDepth + "_" + i);
+			insert(parentId, node);
+			nodes.add(node);
+		}
+
+		if (currentDepth < maxDepth) {
+			for (TreeNode node : nodes) {
+				init(node.getId(), currentDepth + 1, maxDepth, amountFactor);
+			}
+		}
+	}
+
+	@Override
 	public TreeNode get(String nodeId) {
 		return treeNodeRepository.getOne(nodeId);
+	}
+
+	@Override
+	public List<TreeNode> load(String parentId) {
+		return treeNodeRepository.findByParentId(parentId, new Sort(Direction.ASC, "leftPriority"));
 	}
 
 	@Override
