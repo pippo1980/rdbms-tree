@@ -83,7 +83,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="row">
-                <div class="col-md-4 col-sm-8 col-xs-8">
+                <div class="col-md-4 col-sm-8 col-xs-12">
                     <button id="create" type="button" class="btn btn-success btn-sm">
                         <i class="glyphicon glyphicon-asterisk"></i> Create
                     </button>
@@ -94,6 +94,10 @@
                         <i class="glyphicon glyphicon-gift"></i> Init
                     </button>
                 </div>
+
+                <a href="https://github.com/pippo1980/rdbms-tree">
+                    <h4><span class="label label-info">https://github.com/pippo1980/rdbms-tree</span></h4>
+                </a>
             <#--<div class="col-md-2 col-sm-4 col-xs-4" style="text-align:right;">-->
             <#--<input type="text" value=""-->
             <#--style="box-shadow:inset 0 0 4px #eee; width:120px; margin:0; padding:6px 12px; border-radius:4px; border:1px solid silver; font-size:1.1em;"-->
