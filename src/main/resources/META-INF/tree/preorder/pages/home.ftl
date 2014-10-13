@@ -122,7 +122,7 @@
                 </div>
 
                 <div class="col-xs-8 col-md-5">
-                    <h2>数据库中的前序遍历树</h2>
+                    <h2>关系数据库中的前序遍历树</h2>
 
                     <h4><span class="label label-default">在数据库中存储树状结构经常会面临以下问题</span></h4>
                     <ul>
