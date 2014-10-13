@@ -14,21 +14,54 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by pippo on 14-10-10.
  */
 @Controller
-@RequestMapping("/tree")
 public class Tree extends BaseController {
 
 	@Resource
 	private TreeNodeService treeNodeService;
 
 	@RequestMapping("/init")
+	@ResponseBody
 	public Result init() {
-		treeNodeService.init(5, 10);
+		//不要用deleteAll,因为deleteAll是要把所有entity取出来,一条一条delete
+		treeNodeService.removeAll();
+
+		//root node
+		TreeNode root = new TreeNode();
+		root.setId("#");
+		root.setName("root");
+		root.setLeftPriority(0L);
+		root.setRightPriority(1L);
+		root.setDepth(1);
+		treeNodeService.save(root);
+
+		//children
+
+		while (root.getRightPriority() <= 100000) {
+			init(root.getId(), root.getDepth() + 1, 10, 10);
+			root = treeNodeService.get("#");
+		}
+
 		return Result.SUCCESS;
+	}
+
+	private void init(String parentId, int currentDepth, int maxDepth, int amountFactor) {
+		int amount = new Random().nextInt(amountFactor);
+
+		for (int i = 0; i < amount; i++) {
+			TreeNode node = new TreeNode();
+			node.setName("node");
+			treeNodeService.insert(parentId, node);
+
+			if (currentDepth < maxDepth) {
+				init(node.getId(), currentDepth + 1, maxDepth, amountFactor);
+			}
+		}
 	}
 
 	@RequestMapping("/load")

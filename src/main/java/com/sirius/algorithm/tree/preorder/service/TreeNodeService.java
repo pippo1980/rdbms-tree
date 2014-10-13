@@ -9,11 +9,11 @@ import java.util.List;
  */
 public interface TreeNodeService {
 
-	void init(int depth, int amountFactor);
-
 	TreeNode get(String nodeId);
 
 	List<TreeNode> load(String parentId);
+
+	void save(TreeNode node);
 
 	void insert(String parentId, TreeNode node);
 
@@ -22,5 +22,7 @@ public interface TreeNodeService {
 	void move(String parentId, String... nodeId);
 
 	void remove(String nodeId);
+
+	void removeAll();
 
 }

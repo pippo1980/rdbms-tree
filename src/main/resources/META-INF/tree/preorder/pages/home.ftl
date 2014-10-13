@@ -11,7 +11,7 @@
                 'data': {
                     'url': function (node) {
                         console.log(node)
-                        return "${pluginPath}/tree/load";
+                        return "${pluginPath}/load";
                     },
                     'data': function (node) {
                         return { 'id': node.id };
@@ -37,6 +37,9 @@
                     </button>
                     <button type="button" class="btn btn-danger btn-sm" onclick="demo_delete();">
                         <i class="glyphicon glyphicon-remove"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-info btn-sm" >
+                        <i class="glyphicon glyphicon-remove"></i> Init
                     </button>
                 </div>
             <#--<div class="col-md-2 col-sm-4 col-xs-4" style="text-align:right;">-->

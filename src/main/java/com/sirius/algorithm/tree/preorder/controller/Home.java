@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Created by pippo on 14-10-10.
  */
 @Controller
-public class Home {
+public class Home extends BaseController {
 
 	@RequestMapping("/home")
 	public void index() {

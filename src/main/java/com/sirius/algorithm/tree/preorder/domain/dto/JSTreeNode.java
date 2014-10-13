@@ -23,7 +23,7 @@ public class JSTreeNode {
 
 		id = node.getId();
 		parent = node.getParent() != null ? node.getParent().getId() : null;
-		text = node.getName();
+		text = String.format("%s[%s-%s]", node.getName(), node.getLeftPriority(), node.getRightPriority());
 		children = !node.isLeaf();
 		a_attr.put("leftPriority", node.getLeftPriority());
 		a_attr.put("rightPriority", node.getRightPriority());
