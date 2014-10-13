@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.ForkJoinTask;
 
 /**
  * Created by pippo on 14-10-13.
@@ -35,17 +35,16 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 	public List<TreeNode> check() throws Exception {
 		List<TreeNode> invalidNodes = new ArrayList<>();
 		long time = System.currentTimeMillis();
-		boolean flag = true;
 
 		TreeNode root = treeNodeRepository.findOne("#");
 		logger.debug("begin build:[{}]", time);
 		for (TreeNode child : root.getChildren()) {
-			flag = pool.submit(new CheckTask(invalidNodes, root, child)).get();
+			pool.submit(new CheckTask(invalidNodes, root, child)).join();
 		}
 
 		logger.debug("finish build cost:[{}], the root is:[{}]", System.currentTimeMillis() - time, root);
 		logger.debug("[{}], invalid nodes is[]",
-				flag && invalidNodes.isEmpty() ? "机构树左右权值计算完成！验证无错误" : "机构树左右权值计算完成！有错误节点",
+				invalidNodes.isEmpty() ? "机构树左右权值计算完成！验证无错误" : "机构树左右权值计算完成！有错误节点",
 				invalidNodes);
 
 		return invalidNodes;
@@ -62,7 +61,7 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 		}
 	};
 
-	private class CheckTask extends RecursiveTask<Boolean> {
+	private class CheckTask implements Runnable {
 
 		private static final long serialVersionUID = -1604798008383512547L;
 
@@ -79,9 +78,9 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 		private TreeNode node;
 
 		@Override
-		protected Boolean compute() {
+		public void run() {
 			if (parent == null) {
-				return true;
+				return;
 			}
 
 			/* 父节点的左权值应比当前节点的小,否则认为当前节点权值不正确 */
@@ -90,7 +89,7 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 						node.getLeftPriority(),
 						node.getLeftPriority());
 				invalidNodes.add(node);
-				return false;
+				return;
 			}
 
 			/* 父节点的右权值应比当前节点的大,否则认为当前节点权值不正确 */
@@ -99,11 +98,11 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 						node.getRightPriority(),
 						parent.getRightPriority());
 				invalidNodes.add(node);
-				return false;
+				return;
 			}
 
 			if (node.getChildren().isEmpty()) {
-				return true;
+				return;
 			}
 
 			/* 将所有子节点安装左权值排序(正序) */
@@ -118,7 +117,7 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 						children.first().getLeftPriority());
 
 				invalidNodes.add(node);
-				return false;
+				return;
 			}
 
 			/* 子节点的右权值==最后一个子节点的右权值+1 */
@@ -130,19 +129,22 @@ public class TreeNodeCheckServiceImpl implements TreeNodeCheckService {
 						children.last().getLeftPriority());
 
 				invalidNodes.add(node);
-				return false;
+				return;
 			}
 
-			boolean flag = true;
 
 			/* 启动迭代任务检查子节点 */
+			List<ForkJoinTask<?>> tasks = new ArrayList<>();
+
 			for (TreeNode child : children) {
-				CheckTask task = new CheckTask(invalidNodes, node, child);
-				task.fork();
-				flag = task.join();
+				ForkJoinTask<?> task = pool.submit(new CheckTask(invalidNodes, node, child));
+
 			}
 
-			return flag;
+			for (ForkJoinTask task : tasks) {
+				task.join();
+			}
 		}
+
 	}
 }
