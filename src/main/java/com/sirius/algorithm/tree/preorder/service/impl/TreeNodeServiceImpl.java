@@ -1,6 +1,7 @@
 package com.sirius.algorithm.tree.preorder.service.impl;
 
 import com.sirius.algorithm.tree.preorder.domain.model.TreeNode;
+import com.sirius.algorithm.tree.preorder.domain.procedure.DetachNode;
 import com.sirius.algorithm.tree.preorder.domain.procedure.NodeShift;
 import com.sirius.algorithm.tree.preorder.domain.repository.TreeNodeRepository;
 import com.sirius.algorithm.tree.preorder.service.TreeNodeService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,11 +25,24 @@ import java.util.UUID;
 public class TreeNodeServiceImpl implements TreeNodeService {
 
 	@Resource
-	private TreeNodeRepository treeNodeRepository;
+	protected TreeNodeRepository treeNodeRepository;
 
 	@Override
 	public TreeNode get(String nodeId) {
 		return treeNodeRepository.getOne(nodeId);
+	}
+
+	@Override
+	public List<TreeNode> getAncestors(String nodeId) {
+		TreeNode node = get(nodeId);
+		List<TreeNode> ancestors = new ArrayList<>();
+
+		while (node.getParent() != null) {
+			ancestors.add(0, node.getParent());
+			node = node.getParent();
+		}
+
+		return ancestors;
 	}
 
 	@Override
@@ -89,11 +104,31 @@ public class TreeNodeServiceImpl implements TreeNodeService {
 		node.setDepth(parent.getDepth() + 1);
 		/* 保存节点 */
 		treeNodeRepository.save(node);
+
+		/*迭代插入子节点*/
+		if (node.getChildren() != null) {
+			for (TreeNode treeNode : node.getChildren()) {
+				insert(node.getId(), treeNode);
+			}
+		}
 	}
 
 	@Override
-	public void move(String parentId, String... nodeId) {
+	public void move(String targetParentId, String afterBrotherId, String nodeId) {
+		TreeNode node = get(nodeId);
 
+		final long old_left = node.getLeftPriority();
+		final long old_right = node.getRightPriority();
+		long distance = old_right - old_left + 1;
+
+		/*1)将要移动的子树parent置为空*/
+		/*2)将要移动的子树的所有节点的左右权值置为当前值的复数*/
+		/*3)将右边的兄弟节点左移 */
+		treeNodeRepository.execute(new DetachNode(node));
+		treeNodeRepository.execute(new NodeShift(old_right, -distance));
+
+		/*将节点作为新节点插入(id不变,重新计算左右权值)*/
+		insert(targetParentId, afterBrotherId, node);
 	}
 
 	@Override

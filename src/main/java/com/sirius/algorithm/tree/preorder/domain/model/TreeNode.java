@@ -37,6 +37,14 @@ public class TreeNode extends BaseEntity {
 		return rightPriority - leftPriority == 1;
 	}
 
+	@Transient
+	public boolean isChild(TreeNode node) {
+		/*如果所给节点的左节点大于当前节点*/
+		/*并且所给节点的右节点小于当前节点*/
+		/*那么所给节点是当前节点的子节点*/
+		return node.getLeftPriority() > this.leftPriority && node.rightPriority < this.rightPriority;
+	}
+
 	private String name;
 
 	@Column(name = "left_p")
@@ -116,7 +124,7 @@ public class TreeNode extends BaseEntity {
 				.append("rightPriority", rightPriority)
 				.append("depth", depth)
 				.append("parent", parent)
-				.append("children", children)
+				//.append("children", children)
 				.toString();
 	}
 }

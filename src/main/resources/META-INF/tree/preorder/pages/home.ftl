@@ -6,7 +6,18 @@
 <script type="text/javascript" src="${pluginPath}/static/jstree/jstree.min.js"></script>
 <script type="text/javascript">
     $(function () {
-        $('#tree').jstree({
+        $('#tree').on('move_node.jstree', function (event, data) {
+            console.log(data)
+            var tree = $('#tree').jstree(true);
+            var parent = tree.get_node(data.parent);
+            console.log(parent)
+            $.post("${pluginPath}/move/" +
+                   data.node.id,
+                    {targetParentId: parent.id, afterBrotherId: parent.children[data.position - 1]},
+                    function () {
+                        tree.refresh();
+                    })
+        }).jstree({
             'core': {
                 'data': {
                     'url': function (node) {
@@ -16,9 +27,53 @@
                     'data': function (node) {
                         return { 'id': node.id };
                     }
-                }
+                },
+                'check_callback': true,
+                'expand_selected_onload': true
+            },
+            'plugins': [ 'wholerow', 'checkbox', 'dnd', 'search' ],
+            'checkbox': {
+                'three_state': false
             }
         });
+
+        $("#create").click(function () {
+            var tree = $('#tree').jstree(true);
+            var nodes = tree.get_selected(true);
+
+            if (!nodes.length) {
+                return false;
+            }
+
+            var selected = nodes[0];
+            console.log(selected)
+
+            $.post("${pluginPath}/create/" + selected.id, function () {
+                tree.refresh();
+            })
+        })
+
+        $("#remove").click(function () {
+            var tree = $('#tree').jstree(true);
+            var nodes = tree.get_selected(true);
+
+            if (!nodes.length) {
+                return false;
+            }
+
+            var selected = nodes[0];
+            console.log(selected)
+
+            $.post("${pluginPath}/remove/" + selected.id, function () {
+                tree.refresh();
+            })
+        })
+
+        $("#init").click(function () {
+            $.get("${pluginPath}/init", function () {
+                self.location.reload();
+            })
+        })
     });
 
 </script>
@@ -29,17 +84,14 @@
         <div class="panel-heading">
             <div class="row">
                 <div class="col-md-4 col-sm-8 col-xs-8">
-                    <button type="button" class="btn btn-success btn-sm" onclick="demo_create();">
+                    <button id="create" type="button" class="btn btn-success btn-sm">
                         <i class="glyphicon glyphicon-asterisk"></i> Create
                     </button>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="demo_rename();">
-                        <i class="glyphicon glyphicon-pencil"></i> Rename
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="demo_delete();">
+                    <button id="remove" type="button" class="btn btn-danger btn-sm">
                         <i class="glyphicon glyphicon-remove"></i> Delete
                     </button>
-                    <button type="button" class="btn btn-info btn-sm" >
-                        <i class="glyphicon glyphicon-remove"></i> Init
+                    <button id="init" type="button" class="btn btn-info btn-sm">
+                        <i class="glyphicon glyphicon-gift"></i> Init
                     </button>
                 </div>
             <#--<div class="col-md-2 col-sm-4 col-xs-4" style="text-align:right;">-->

@@ -5,8 +5,10 @@ import com.google.common.collect.Collections2;
 import com.sirius.algorithm.tree.preorder.domain.dto.JSTreeNode;
 import com.sirius.algorithm.tree.preorder.domain.dto.Result;
 import com.sirius.algorithm.tree.preorder.domain.model.TreeNode;
+import com.sirius.algorithm.tree.preorder.service.TreeNodeCheckService;
 import com.sirius.algorithm.tree.preorder.service.TreeNodeService;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,6 +27,9 @@ public class Tree extends BaseController {
 	@Resource
 	private TreeNodeService treeNodeService;
 
+	@Resource
+	private TreeNodeCheckService treeNodeCheckService;
+
 	@RequestMapping("/init")
 	@ResponseBody
 	public Result init() {
@@ -42,16 +47,16 @@ public class Tree extends BaseController {
 
 		//children
 
-		while (root.getRightPriority() <= 100000) {
-			init(root.getId(), root.getDepth() + 1, 10, 10);
-			root = treeNodeService.get("#");
-		}
+		//while (root.getRightPriority() <= 100000) {
+		init(root.getId(), root.getDepth() + 1, 5, 10);
+		//	root = treeNodeService.get("#");
+		//}
 
 		return Result.SUCCESS;
 	}
 
 	private void init(String parentId, int currentDepth, int maxDepth, int amountFactor) {
-		int amount = new Random().nextInt(amountFactor);
+		int amount = Math.max(2, new Random().nextInt(amountFactor));
 
 		for (int i = 0; i < amount; i++) {
 			TreeNode node = new TreeNode();
@@ -82,4 +87,44 @@ public class Tree extends BaseController {
 
 	}
 
+	@RequestMapping("/create/{parentId}")
+	@ResponseBody
+	public Result create(@PathVariable("parentId") String parentId) {
+		TreeNode node = new TreeNode();
+		node.setName("node");
+		treeNodeService.insert(parentId, node);
+		return Result.SUCCESS;
+	}
+
+	@RequestMapping("/move/{nodeId}")
+	@ResponseBody
+	public Result move(@PathVariable("nodeId") String nodeId,
+			@RequestParam("targetParentId") String targetParentId,
+			@RequestParam(value = "afterBrotherId", required = false) String afterBrotherId) {
+		treeNodeService.move(targetParentId, afterBrotherId, nodeId);
+		return Result.SUCCESS;
+	}
+
+	@RequestMapping("/remove/{nodeId}")
+	@ResponseBody
+	public Result remove(@PathVariable("nodeId") String nodeId) {
+		treeNodeService.remove(nodeId);
+		return Result.SUCCESS;
+	}
+
+	@RequestMapping("/check")
+	@ResponseBody
+	public Result check() throws Exception {
+		List<TreeNode> nodes = treeNodeCheckService.check();
+		Collection<JSTreeNode> payload = Collections2.transform(nodes, new Function<TreeNode, JSTreeNode>() {
+			@Override
+			public JSTreeNode apply(TreeNode input) {
+				return new JSTreeNode(input);
+			}
+		});
+
+		Result result = new Result();
+		result.setPayload(payload);
+		return result;
+	}
 }
