@@ -2,6 +2,8 @@ rdbms-tree
 ==========
 
 关系数据库维护前序遍历树
+##[Demo](http://121.40.90.183:8082/tree/preorder/home)
+    http://121.40.90.183:8082/tree/preorder/home
 
 ##在IDEA中直接启动
     1)import to IDEA
