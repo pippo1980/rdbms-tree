@@ -10,15 +10,13 @@
 
     <properties>
         <spring.version>4.0.0.RELEASE</spring.version>
-        <engine.version>1.0-RELEASE</engine.version>
-        <jpa-support.version>1.0-RELEASE</jpa-support.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.sirius.plugin-framework</groupId>
             <artifactId>bom</artifactId>
-            <version>1.1-GA</version>
+            <version>1.2-GA</version>
             <type>pom</type>
         </dependency>
 
